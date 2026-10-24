@@ -206,6 +206,38 @@
   .pdf-btn:hover{background:rgba(201,162,39,.12);color:var(--gold-bright);}
   .pdf-status{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--dim);margin-top:10px;display:none;}
 
+
+  .err{color:var(--gold-bright)!important;}
+  .tbl{width:100%;border-collapse:collapse;font-size:13px;margin-top:6px;}
+  .tbl th{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);text-align:left;font-weight:500;padding:8px 6px;border-bottom:1px solid var(--line);}
+  .tbl td{padding:9px 6px;border-bottom:1px solid var(--line);color:var(--ivory);}
+  .tbl th.n,.tbl td.n{text-align:right;font-family:'IBM Plex Mono',monospace;}
+  .tbl tr.hl td{color:var(--gold-bright);background:rgba(201,162,39,.07);}
+  .tbl tr.tot td{border-bottom:none;color:var(--white);font-weight:600;}
+  .kv{display:grid;grid-template-columns:1fr 1fr;gap:0 24px;margin-bottom:20px;}
+  @media(max-width:600px){.kv{grid-template-columns:1fr;}}
+  .kv div.row{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px;}
+  .kv .k{color:var(--dim);}
+  .kv .v{color:var(--white);font-family:'IBM Plex Mono',monospace;text-align:right;}
+  .kv .v.gold{color:var(--gold-bright);}
+  .example{border:1px solid var(--gold);background:rgba(201,162,39,.06);border-radius:4px;padding:14px 16px;margin-top:18px;font-size:13px;color:var(--ivory);}
+  .example b{color:var(--gold-bright);font-family:'IBM Plex Mono',monospace;font-weight:500;}
+  .example div{margin:3px 0;}
+  .warn{font-size:12px;color:var(--gold-bright);margin:0 0 14px;}
+  .tl-stack{display:flex;height:10px;border-radius:5px;overflow:hidden;background:var(--panel-2);}
+  .seg-pis{background:rgba(255,255,255,.9);}
+  .seg-cbs{background:var(--gold);}
+  .seg-ibs{background:#f6e3a1;}
+  .seg-loc{background:rgba(255,255,255,.38);}
+  .dot.pis{background:rgba(255,255,255,.9);} .dot.cbs{background:var(--gold);} .dot.ibs{background:#f6e3a1;} .dot.loc{background:rgba(255,255,255,.38);}
+  .legend{flex-wrap:wrap;}
+
+  .wa-btn{display:block;text-align:center;text-decoration:none;background:var(--gold);color:#141414;border:1px solid var(--gold);border-radius:4px;padding:18px 22px;font-family:'IBM Plex Sans',sans-serif;font-weight:700;font-size:14.5px;letter-spacing:.06em;text-transform:uppercase;transition:.15s;margin-bottom:14px;}
+  .wa-btn:hover{background:var(--gold-bright);border-color:var(--gold-bright);}
+  .seg-cons{background:rgba(255,255,255,.9);} .seg-cons.seg-new{background:rgba(255,255,255,.9);}
+  .seg-irpj{background:var(--gold);}
+  .seg-csll{background:#f6e3a1;}
+  .dot.cons{background:rgba(255,255,255,.9);} .dot.irpj{background:var(--gold);} .dot.csll{background:#f6e3a1;}
   footer.brand{
     text-align:center;padding:40px 0 0;color:var(--dim);
     font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;
@@ -257,6 +289,7 @@
           <div class="chip" data-val="industria">Indústria</div>
           <div class="chip" data-val="servico">Serviço</div>
         </div>
+        <div class="hint err" id="segErr" style="display:none;">Selecione o segmento para continuar.</div>
       </div>
 
       <div class="field">
@@ -279,6 +312,7 @@
         <div class="field">
           <label>Faturamento anual (R$)</label>
           <input type="number" id="faturamento" placeholder="Ex: 1200000" min="0">
+          <div class="hint err" id="fatErr" style="display:none;">Informe o faturamento anual para calcular a simulação.</div>
         </div>
         <div class="field">
           <label>Regime tributário atual</label>
@@ -288,6 +322,39 @@
             <option value="real">Lucro Real</option>
           </select>
         </div>
+      </div>
+
+      <div class="field" id="anexoField" style="display:none;">
+        <label>Anexo do Simples Nacional</label>
+        <select id="anexo">
+          <option value="I">Anexo I: Comércio</option>
+          <option value="II">Anexo II: Indústria</option>
+          <option value="III">Anexo III: Serviços em geral (inclui Fator R a partir de 28%)</option>
+          <option value="IV">Anexo IV: Construção, vigilância, limpeza e advocacia (CPP por fora)</option>
+          <option value="V">Anexo V: Serviços intelectuais e técnicos com Fator R abaixo de 28%</option>
+        </select>
+        <div class="hint">Define a tabela e a partilha do DAS (LC 123/2006, com a redação dada pela LC 214/2025 a partir de 2027). Cada atividade tem o seu anexo. Em caso de dúvida, consulte a Terrossi.</div>
+      </div>
+
+      <div class="field" id="presField" style="display:none;">
+        <label>Atividade para a presunção de lucro (Lucro Presumido)</label>
+        <select id="pres">
+          <option value="ci">Comércio e indústria: IRPJ 8% e CSLL 12%</option>
+          <option value="serv">Serviços em geral: IRPJ 32% e CSLL 32%</option>
+          <option value="hosp">Serviços hospitalares e transporte de cargas: IRPJ 8% e CSLL 12%</option>
+          <option value="pass">Transporte de passageiros: IRPJ 16% e CSLL 12%</option>
+          <option value="comb">Revenda de combustíveis: IRPJ 1,6% e CSLL 12%</option>
+        </select>
+        <div class="hint">Percentuais de presunção para apurar a base do IRPJ e da CSLL (Lei 9.249/1995). Acima de R$ 5 milhões de receita anual, há acréscimo de 10% sobre a parcela excedente (LC 224/2025).</div>
+      </div>
+
+      <div class="field" id="margemField" style="display:none;">
+        <label>Margem de lucro antes do IRPJ e da CSLL (% do faturamento)</label>
+        <div class="slider-row">
+          <input type="range" id="margem" min="0" max="40" step="0.5" value="8">
+          <span class="slider-val mono"><span id="margemVal">8</span>%</span>
+        </div>
+        <div class="hint">Usada para estimar o IRPJ e a CSLL no Lucro Real. Informe a margem aproximada que sua empresa tem hoje.</div>
       </div>
 
       <div class="field" id="aliqAtualField">
@@ -356,28 +423,41 @@
 
     <div class="kpi-grid">
       <div class="kpi">
-        <div class="label">Carga atual (tributos sobre consumo)</div>
+        <div class="label" id="kpiAtualLabel">Carga atual (tributos sobre consumo)</div>
         <div class="value" id="kpiAtual">-</div>
       </div>
       <div class="kpi">
-        <div class="label">Carga estimada em 2033 (IBS + CBS)</div>
+        <div class="label" id="kpiNovoLabel">Carga estimada em 2033 (IBS + CBS)</div>
         <div class="value gold" id="kpiNovo">-</div>
       </div>
       <div class="kpi">
-        <div class="label">Variação estimada por ano</div>
+        <div class="label" id="kpiDeltaLabel">Variação estimada por ano</div>
         <div class="value" id="kpiDelta">-</div>
         <div class="delta" id="kpiDeltaTag"></div>
       </div>
     </div>
 
+    <div class="ledger" id="simplesCalc" style="display:none;">
+      <h3>Cálculo da alíquota efetiva e partilha do DAS</h3>
+      <p class="sub" id="simplesCalcSub"></p>
+      <div id="simplesWarn"></div>
+      <div class="kv" id="simplesKv"></div>
+      <table class="tbl" id="simplesTbl"></table>
+      <div class="example" id="simplesExample"></div>
+    </div>
+
+    <div class="ledger" id="geralCalc" style="display:none;">
+      <h3>Composição da carga: consumo, IRPJ e CSLL</h3>
+      <p class="sub">Comparação entre a carga de hoje e a carga estimada em 2033, em % do faturamento e em reais por ano.</p>
+      <table class="tbl" id="geralTbl"></table>
+      <div class="example" id="geralNote"></div>
+    </div>
+
     <div class="ledger">
-      <h3>Linha do tempo da transição, 2026 a 2033</h3>
-      <p class="sub">Carga tributária estimada sobre o faturamento, ano a ano, conforme o cronograma nacional da LC 214/2025.</p>
+      <h3 id="tlTitle">Linha do tempo da transição, 2026 a 2033</h3>
+      <p class="sub" id="tlSub">Carga tributária estimada sobre o faturamento, ano a ano, conforme o cronograma nacional da LC 214/2025.</p>
       <div class="timeline" id="timeline"></div>
-      <div class="legend">
-        <span><span class="dot white"></span> Sistema atual (PIS/COFINS/ICMS/ISS)</span>
-        <span><span class="dot gold"></span> Novo sistema (CBS + IBS)</span>
-      </div>
+      <div class="legend" id="legend"></div>
     </div>
 
     <div class="basis" id="basisCard">
@@ -391,7 +471,7 @@
     </div>
 
     <div class="disclaimer" id="disclaimerBox">
-      Esta é uma simulação estimada, com fins educativos e de prospecção comercial, baseada em alíquotas de referência nacionais ainda sujeitas a confirmação por Resolução do Senado (art. 475, parágrafo 11, LC 214/2025) e em parâmetros médios de mercado. Os valores exatos dependem da apuração real de créditos, do enquadramento tributário definitivo e de regulamentações do Comitê Gestor do IBS. Não substitui um estudo tributário formal.
+      Esta é uma simulação estimada, com fins educativos e de prospecção comercial, baseada em alíquotas de referência nacionais ainda sujeitas a confirmação por Resolução do Senado (art. 475, parágrafo 11, LC 214/2025) e em parâmetros médios de mercado. Os valores exatos dependem da apuração real de créditos, do enquadramento tributário definitivo e de regulamentações do Comitê Gestor do IBS. Não substitui um estudo tributário formal.<span id="irpjNote"></span>
     </div>
     </div>
 
@@ -399,18 +479,8 @@
       <div class="eyebrow">Próximo passo</div>
       <h3>Quer o diagnóstico completo, feito por um especialista?</h3>
       <p>A Terrossi Contabilidade pode aprofundar essa simulação com seus dados reais, mapear créditos de IBS e CBS e preparar sua empresa para cada fase da transição até 2033.</p>
-      <div class="row2">
-        <div class="field" style="margin-bottom:0;">
-          <label>Seu nome</label>
-          <input type="text" id="leadNome" placeholder="Nome completo">
-        </div>
-        <div class="field" style="margin-bottom:0;">
-          <label>WhatsApp</label>
-          <input type="text" id="leadWhats" placeholder="(41) 9....-....">
-        </div>
-      </div>
+      <a class="wa-btn" href="https://wa.me/5541991490177" target="_blank" rel="noopener">Entre em contato com a Contabilidade Terrossi para entender</a>
       <div class="cta-actions">
-        <button onclick="enviarLead()">Falar com a Terrossi no WhatsApp</button>
         <button class="pdf-btn" onclick="baixarPDF()">Baixar relatório em PDF</button>
         <button class="ghost" onclick="reiniciar()">Simular outra empresa</button>
       </div>
@@ -463,7 +533,28 @@ function updateAliqLabel(){
     slider.value = 19;
   }
   document.getElementById('aliqAtualVal').textContent = slider.value;
+  if(!state.anexoManual){
+    document.getElementById('anexo').value = {comercio:'I', industria:'II', servico:'III'}[state.segmento] || 'I';
+  }
+  if(!state.presManual){
+    document.getElementById('pres').value = state.segmento==='servico' ? 'serv' : 'ci';
+  }
+  document.getElementById('segErr').style.display = 'none';
 }
+
+function syncRegime(){
+  const r = document.getElementById('regime').value;
+  const sn = r === 'simples';
+  document.getElementById('anexoField').style.display = sn ? 'block' : 'none';
+  document.getElementById('aliqAtualField').style.display = sn ? 'none' : 'block';
+  document.getElementById('presField').style.display = r==='presumido' ? 'block' : 'none';
+  document.getElementById('margemField').style.display = r==='real' ? 'block' : 'none';
+}
+document.getElementById('pres').addEventListener('change', ()=>{ state.presManual = true; });
+document.getElementById('margem').addEventListener('input', e=>{ document.getElementById('margemVal').textContent = e.target.value; });
+document.getElementById('regime').addEventListener('change', syncRegime);
+document.getElementById('anexo').addEventListener('change', ()=>{ state.anexoManual = true; });
+syncRegime();
 
 document.getElementById('aliqAtual').addEventListener('input', e=>{
   document.getElementById('aliqAtualVal').textContent = e.target.value;
@@ -477,20 +568,97 @@ function fmtBRL(v){
 }
 function fmtPct(v){ return v.toFixed(1).replace('.', ',') + '%'; }
 
-const SIMPLES_TABLE = {
-  comercio:[[4.0,0],[7.3,5940],[9.5,13860],[10.7,22500],[14.3,87300],[19.0,378000]],
-  industria:[[4.5,0],[7.8,5940],[10.0,13860],[11.2,22500],[14.7,85500],[30.0,720000]],
-  servico:[[6.0,0],[11.2,9360],[13.5,17640],[16.0,35640],[21.0,125640],[33.0,648000]],
+/* ===== SIMPLES NACIONAL: LC 123/2006 com a redação da LC 214/2025 (arts. 519 e seguintes) =====
+   Linha de partilha: [IRPJ, CSLL, CBS, CPP, IPI, ICMS/ISS, IBS] em % da alíquota efetiva (tabelas 2027 e 2028).
+   6ª faixa: ICMS, ISS e IBS são recolhidos fora do DAS. */
+const SN_LIM = [180000,360000,720000,1800000,3600000,4800000];
+const SN_FRAC = {2029:0.1,2030:0.2,2031:0.3,2032:0.4,2033:1};
+const SN = {
+  I:{nome:'Anexo I (Comércio)', loc:'ICMS',
+    nom:[4.0,7.3,9.5,10.7,14.3,18.9], nom6:19.0, ded:[0,5940,13860,22500,87300,378000],
+    part:[[5.5,3.5,15.33,41.5,0,34,0.17],[5.5,3.5,15.33,41.5,0,34,0.17],[5.5,3.5,15.33,42,0,33.5,0.17],
+          [5.5,3.5,15.33,42,0,33.5,0.17],[5.5,3.5,15.33,42,0,33.5,0.17],[13.58,10.06,34.02,42.34,0,0,0]]},
+  II:{nome:'Anexo II (Indústria)', loc:'ICMS',
+    nom:[4.5,7.8,10.0,11.2,14.7,29.9], nom6:30.0, ded:[0,5940,13860,22500,85500,720000],
+    part:[[5.5,3.5,13.85,37.5,7.5,32,0.15],[5.5,3.5,13.85,37.5,7.5,32,0.15],[5.5,3.5,13.85,37.5,7.5,32,0.15],
+          [5.5,3.5,13.85,37.5,7.5,32,0.15],[5.5,3.5,13.85,37.5,7.5,32,0.15],[8.53,7.53,25.22,23.59,35.13,0,0]]},
+  III:{nome:'Anexo III (Serviços)', loc:'ISS',
+    nom:[6.0,11.2,13.5,16.0,21.0,32.9], nom6:33.0, ded:[0,9360,17640,35640,125640,648000],
+    part:[[4,3.5,15.43,43.4,0,33.5,0.17],[4,3.5,16.91,43.4,0,32,0.19],[4,3.5,16.41,43.4,0,32.5,0.19],
+          [4,3.5,16.41,43.4,0,32.5,0.19],[4,3.5,15.43,43.4,0,33.5,0.17],[35.09,15.04,19.29,30.58,0,0,0]]},
+  IV:{nome:'Anexo IV (Serviços com CPP por fora)', loc:'ISS',
+    nom:[4.5,9.0,10.2,14.0,22.0,32.9], nom6:33.0, ded:[0,8100,12420,39780,183780,828000],
+    part:[[18.8,15.2,21.26,0,0,44.5,0.24],[19.8,15.2,24.73,0,0,40,0.27],[20.8,15.2,23.74,0,0,40,0.26],
+          [17.8,19.2,22.75,0,0,40,0.25],[18.8,19.2,21.76,0,0,40,0.24],[53.71,21.59,24.7,0,0,0,0]]},
+  V:{nome:'Anexo V (Serviços intelectuais e técnicos)', loc:'ISS',
+    nom:[15.5,18.0,19.5,20.5,23.0,30.4], nom6:30.5, ded:[0,4500,9900,17100,62100,540000],
+    part:[[25,15,16.96,28.85,0,14,0.19],[23,15,16.96,27.85,0,17,0.19],[24,15,17.95,23.85,0,19,0.20],
+          [21,15,18.94,23.85,0,21,0.21],[23,12.5,16.96,23.85,0,23.5,0.19],[35.1,15.54,19.78,29.58,0,0,0]]},
 };
-const SIMPLES_TETO = [180000,360000,720000,1800000,3600000,4800000];
 
-function simplesEfetiva(segmento, faturamento){
-  const tabela = SIMPLES_TABLE[segmento] || SIMPLES_TABLE.servico;
-  let faixa = 0;
-  for(let i=0;i<SIMPLES_TETO.length;i++){ if(faturamento<=SIMPLES_TETO[i]){ faixa=i; break; } faixa=i; }
-  const [aliq, deducao] = tabela[faixa];
-  const efetiva = faturamento>0 ? ((faturamento*(aliq/100))-deducao)/faturamento*100 : aliq;
-  return Math.max(efetiva, aliq*0.4);
+function snFaixa(rbt){ for(let i=0;i<6;i++){ if(rbt<=SN_LIM[i]) return i; } return 5; }
+
+/* Calcula alíquota efetiva e partilha do DAS para um anexo, receita (RBT12) e ano.
+   2026: Simples fora do teste de CBS/IBS (art. 348, III, "c"); a fatia de CBS/IBS ainda é PIS/COFINS.
+   2027 e 2028: tabelas oficiais. 2029 a 2033: CBS absorve a fatia mínima de IBS e o IBS ocupa
+   10%, 20%, 30%, 40% e 100% da fatia de ICMS/ISS. */
+/* Regra especial da 5ª faixa (Anexos III e IV): acima do limite de alíquota efetiva, o ISS fica fixo em 5%
+   e o excedente (alíquota efetiva menos 5%) é redistribuído entre os demais tributos. */
+const SN_EXC = {
+  III:{lim:14.92537, irpj:6.02, csll:5.26, cbs:23.20, cpp:65.26, ibs:0.26},
+  IV:{lim:12.5, irpj:31.33, csll:32.00, cbs:36.27, cpp:0, ibs:0.40},
+};
+
+function snCalc(k, rbt, ano){
+  const A = SN[k], f = snFaixa(rbt);
+  const nominal = (f===5 && (ano===2026 || ano>=2029)) ? A.nom6 : A.nom[f];
+  const ef = rbt>0 ? ((rbt*nominal/100) - A.ded[f]) / rbt * 100 : nominal;
+  const r = A.part[f];
+  const s = {irpj:r[0], csll:r[1], cbs:r[2], cpp:r[3], ipi:r[4], loc:r[5], ibs:r[6], pis:0};
+  let excecao = false, p = {};
+  const E = SN_EXC[k];
+  if(f===4 && E && ef > E.lim){
+    excecao = true;
+    const ex = ef - 5;
+    p = {irpj:ex*E.irpj/100, csll:ex*E.csll/100, cpp:ex*E.cpp/100, ipi:0, pis:0, cbs:0, ibs:0, loc:5};
+    const cbsBase = ex*E.cbs/100, ibsBase = ex*E.ibs/100;
+    if(ano===2026){ p.pis = cbsBase + ibsBase; }
+    else if(ano<=2028){ p.cbs = cbsBase; p.ibs = ibsBase; }
+    else { const fr = SN_FRAC[ano]; p.cbs = cbsBase + ibsBase; p.ibs = 5*fr; p.loc = 5*(1-fr); }
+    Object.keys(p).forEach(x=>{ s[x] = ef>0 ? p[x]/ef*100 : 0; });
+  } else {
+    if(ano===2026){ s.pis = r[2] + r[6]; s.cbs = 0; s.ibs = 0; }
+    else if(ano>=2029 && f<5){ const fr = SN_FRAC[ano]; s.cbs = r[2] + r[6]; s.ibs = r[5]*fr; s.loc = r[5]*(1-fr); }
+    Object.keys(s).forEach(x=>{ p[x] = ef * s[x] / 100; });
+  }
+  return {A, f, nominal, ded:A.ded[f], ef, s, p, excecao};
+}
+
+function fmtN(v,d){ return v.toFixed(d).replace('.', ','); }
+function fmtBRL2(v){ return v.toLocaleString('pt-BR',{style:'currency',currency:'BRL',minimumFractionDigits:2,maximumFractionDigits:2}); }
+function faixaLabel(i){
+  if(i===0) return 'Até ' + fmtBRL2(SN_LIM[0]);
+  return 'De ' + fmtBRL2(SN_LIM[i-1]+0.01) + ' a ' + fmtBRL2(SN_LIM[i]);
+}
+
+const PRES = {ci:[8,12], serv:[32,32], hosp:[8,12], pass:[16,12], comb:[1.6,12]};
+
+/* IRPJ e CSLL em % do faturamento. Presumido: presunção com acréscimo de 10% sobre a receita acima de
+   R$ 5 milhões (LC 224/2025; limite da CSLL em 2026 de R$ 3,75 milhões). Real: sobre o lucro informado.
+   IRPJ: 15% mais 10% de adicional sobre a base acima de R$ 240.000 por ano. CSLL: 9%. */
+function irpjCsll(regime, fat, ano, pres, margemPct){
+  let baseI, baseC;
+  if(regime==='presumido'){
+    const pI = pres[0]/100, pC = pres[1]/100;
+    const limI = 5000000, limC = ano===2026 ? 3750000 : 5000000;
+    baseI = Math.min(fat,limI)*pI + Math.max(fat-limI,0)*pI*1.1;
+    baseC = Math.min(fat,limC)*pC + Math.max(fat-limC,0)*pC*1.1;
+  } else {
+    baseI = baseC = fat*Math.max(margemPct,0)/100;
+  }
+  const irpj = 0.15*baseI + 0.10*Math.max(baseI-240000,0);
+  const csll = 0.09*baseC;
+  return {irpj: irpj/fat*100, csll: csll/fat*100};
 }
 
 function gerarRelatorio(){
@@ -499,94 +667,255 @@ function gerarRelatorio(){
   const regime = document.getElementById('regime').value;
   const aliqAtual = parseFloat(document.getElementById('aliqAtual').value);
   const credito = parseFloat(document.getElementById('credito').value)/100;
-  const segmento = state.segmento || 'servico';
+  const anexo = document.getElementById('anexo').value;
   const reducao = state.reducao || 0;
 
-  // current burden (percent of revenue)
-  let pisCofins, consumoAtual, cargaAtualPct, simplesMode=false;
-  if(regime==='simples'){
-    simplesMode = true;
-    cargaAtualPct = simplesEfetiva(segmento, faturamento);
-  } else {
-    pisCofins = regime==='presumido' ? 3.65 : 9.25*(1-credito);
-    consumoAtual = segmento==='servico' ? aliqAtual : aliqAtual*(1-credito);
-    cargaAtualPct = pisCofins + consumoAtual;
-  }
+  // validações
+  document.getElementById('segErr').style.display = state.segmento ? 'none' : 'block';
+  document.getElementById('fatErr').style.display = faturamento>0 ? 'none' : 'block';
+  if(!state.segmento){ goStep(1); return; }
+  if(faturamento<=0){ goStep(2); return; }
+  const segmento = state.segmento;
 
-  // new system (percent of revenue)
+  // novo sistema (regime regular), em % do faturamento
   const REF = 26.5, CBS_SHARE = 8.8/26.5, IBS_SHARE = 17.7/26.5;
-  const afterSector = REF * (1-reducao/100);
-  const netNew = afterSector * (1-credito);
-  const cbsNet = netNew*CBS_SHARE;
-  const ibsNet = netNew*IBS_SHARE;
+  const netNew = REF * (1-reducao/100) * (1-credito);
+  const cbsNet = netNew*CBS_SHARE, ibsNet = netNew*IBS_SHARE;
 
-  const baseline = cargaAtualPct;
-  const oldConsumoOnly = simplesMode ? cargaAtualPct : consumoAtual;
+  const isSN = regime==='simples';
+  const $ = id => document.getElementById(id);
+  $('simplesCalc').style.display = isSN ? 'block' : 'none';
+  $('geralCalc').style.display = isSN ? 'none' : 'block';
+  $('irpjNote').textContent = isSN ? '' : ' IRPJ e CSLL foram estimados de forma simplificada, pelas regras do Lucro Presumido (percentuais de presunção, com o acréscimo da LC 224/2025) ou do Lucro Real (a partir da margem informada), sem considerar compensação de prejuízos, incentivos fiscais, juros sobre capital próprio ou apuração por atividade.';
 
-  const anos = [
-    {ano:2026, pct: baseline, tag:'Fase de teste: CBS 0,9% e IBS 0,1%, sem desembolso real (art. 348, LC 214/2025)'},
-    {ano:2027, pct: simplesMode ? baseline : (cbsNet + oldConsumoOnly), tag:'CBS substitui PIS e COFINS; Imposto Seletivo entra em vigor'},
-    {ano:2028, pct: simplesMode ? baseline : (cbsNet + oldConsumoOnly), tag:'Consolidação, com ICMS e ISS ainda vigentes'},
-    {ano:2029, pct: simplesMode ? baseline*0.9+netNew*0.1 : (cbsNet + ibsNet*0.10 + oldConsumoOnly*0.90), tag:'IBS passa a substituir 10% do ICMS e do ISS'},
-    {ano:2030, pct: simplesMode ? baseline*0.8+netNew*0.2 : (cbsNet + ibsNet*0.20 + oldConsumoOnly*0.80), tag:'Substituição de 20% do ICMS e do ISS'},
-    {ano:2031, pct: simplesMode ? baseline*0.7+netNew*0.3 : (cbsNet + ibsNet*0.30 + oldConsumoOnly*0.70), tag:'Substituição de 30% do ICMS e do ISS'},
-    {ano:2032, pct: simplesMode ? baseline*0.6+netNew*0.4 : (cbsNet + ibsNet*0.40 + oldConsumoOnly*0.60), tag:'Substituição de 40% do ICMS e do ISS'},
-    {ano:2033, pct: netNew, tag:'Sistema pleno. ICMS, ISS, PIS, COFINS e IPI extintos'},
-  ];
+  $('reportTitle').textContent = nome ? `${nome} na Reforma Tributária` : 'Sua empresa na Reforma Tributária';
+  $('reportSub').textContent = `${segmentoLabel(segmento)} · ${regimeLabel(regime)}${isSN?' · '+SN[anexo].nome:''} · ${nichoLabel(state.nicho)} · Faturamento anual ${fmtBRL(faturamento)}`;
 
-  document.getElementById('reportTitle').textContent = nome ? `${nome} na Reforma Tributária` : 'Sua empresa na Reforma Tributária';
-  document.getElementById('reportSub').textContent = `${segmentoLabel(segmento)} · ${regimeLabel(regime)} · ${nichoLabel(state.nicho)}${faturamento?' · Faturamento anual '+fmtBRL(faturamento):''}`;
+  const tag = $('kpiDeltaTag');
+  const tl = $('timeline');
 
-  document.getElementById('kpiAtual').textContent = fmtPct(cargaAtualPct) + (faturamento? ' · '+fmtBRL(faturamento*cargaAtualPct/100)+'/ano':'');
-  document.getElementById('kpiNovo').textContent = fmtPct(netNew) + (faturamento? ' · '+fmtBRL(faturamento*netNew/100)+'/ano':'');
-  const delta = netNew - cargaAtualPct;
-  document.getElementById('kpiDelta').textContent = (delta>=0?'+':'') + fmtPct(delta);
-  const tag = document.getElementById('kpiDeltaTag');
-  if(delta>0){ tag.textContent='Tendência de aumento de carga'; tag.className='delta up'; }
-  else { tag.textContent='Tendência de redução de carga'; tag.className='delta down'; }
+  if(isSN){
+    // ---------- SIMPLES NACIONAL ----------
+    const c27 = snCalc(anexo, faturamento, 2027);
+    const c26 = snCalc(anexo, faturamento, 2026);
+    const c33 = snCalc(anexo, faturamento, 2033);
+    const A = c27.A, f = c27.f, fora = f===5;
+    const locNome = A.loc;
 
-  const maxPct = Math.max(...anos.map(a=>a.pct), cargaAtualPct, netNew) * 1.15;
-  const tl = document.getElementById('timeline');
-  tl.innerHTML = anos.map(a=>{
-    const w = Math.max((a.pct/maxPct)*100, 3);
-    const isNew = a.ano>=2033;
-    return `<div class="tl-row">
-      <div class="tl-year mono">${a.ano}</div>
-      <div>
-        <div class="tl-bar-track"><div class="tl-bar-fill ${isNew?'new-system':''}" style="width:${w}%"></div></div>
-        <div class="tl-note">${a.tag}</div>
-      </div>
-      <div class="tl-pct">${fmtPct(a.pct)}</div>
-    </div>`;
-  }).join('');
+    $('simplesCalcSub').textContent = `Tabela do ${A.nome} para 2027 e 2028 (LC 123/2006 com a redação da LC 214/2025). Os percentuais da partilha incidem sobre a alíquota efetiva do DAS, não diretamente sobre o faturamento.`;
+    let warn = '';
+    if(faturamento>4800000) warn += '<p class="warn">Atenção: a receita informada ultrapassa o limite de R$ 4.800.000,00 do Simples Nacional. O cálculo considera a 6ª faixa apenas como referência.</p>';
+    else if(faturamento>3600000) warn += '<p class="warn">Acima de R$ 3.600.000,00 (sublimite), ICMS, ISS e IBS são recolhidos fora do DAS, pelo regime regular.</p>';
+    if(c27.excecao) warn += `<p class="warn">Regra especial da 5ª faixa: com alíquota efetiva acima de ${fmtN(SN_EXC[anexo].lim,2)}%, o ISS fica fixo em 5% e o excedente é redistribuído entre IRPJ, CSLL, CBS, CPP e IBS. A partilha abaixo já reflete essa regra.</p>`;
+    if(anexo==='IV') warn += '<p class="warn">No Anexo IV, a CPP (contribuição patronal) não integra o DAS e é recolhida à parte.</p>';
+    $('simplesWarn').innerHTML = warn;
 
-  const basisItems = [
-    {cite:'EC 132/2023', desc:'Emenda Constitucional que instituiu a reforma do consumo em todo o território nacional, criando o IVA dual (IBS e CBS) e o Imposto Seletivo.'},
-    {cite:'LC 214/2025', desc:'Lei complementar nacional que regulamenta o IBS, a CBS e o Imposto Seletivo: fato gerador, não cumulatividade, regimes específicos e cronograma de transição.'},
-    {cite:'Art. 348, LC 214/2025', desc:'2026 é ano-teste em todo o Brasil: CBS e IBS incidem a 0,9% e 0,1%, compensáveis com PIS e COFINS, sem recolhimento efetivo para quem cumprir as obrigações acessórias.'},
-    {cite:'Arts. 90 a 99', desc:'Criação do Comitê Gestor do IBS, órgão nacional responsável pela governança e regulamentação do imposto durante a transição.'},
-  ];
-  if(reducao===30) basisItems.push({cite:'Art. 127, LC 214/2025', desc:'Redução nacional de 30% na alíquota de referência para profissões intelectuais regulamentadas por conselho de classe.'});
-  if(reducao===60) basisItems.push({cite:'Art. 128, LC 214/2025', desc:'Redução nacional de 60% na alíquota de referência para saúde, educação, dispositivos médicos, medicamentos e alimentos.'});
-  if(reducao===100) basisItems.push({cite:'Arts. 125 e 157, LC 214/2025', desc:'Alíquota zero para a Cesta Básica Nacional e isenção para o transporte público coletivo, aplicáveis em todo o país.'});
-  if(regime==='simples') basisItems.push({cite:'Regime específico do Simples Nacional', desc:'Empresas optantes seguem no regime unificado (DAS) e só passam a interagir com o novo modelo a partir de 2027, quando poderão avaliar a adesão ao regime regular de créditos de IBS e CBS.'});
-  document.getElementById('basisList').innerHTML = basisItems.map(b=>`<div class="basis-item"><div class="cite">${b.cite}</div><div class="desc">${b.desc}</div></div>`).join('');
+    $('simplesKv').innerHTML = [
+      ['Anexo', A.nome],
+      ['Receita bruta em 12 meses (RBT12)', fmtBRL2(faturamento)],
+      [`Faixa ${f+1}ª`, faixaLabel(f)],
+      ['Alíquota nominal', fmtN(c27.nominal,2)+'%'],
+      ['Parcela a deduzir', fmtBRL2(c27.ded)],
+      ['Alíquota efetiva', fmtN(c27.ef,4)+'%', true],
+    ].map(([k,v,g])=>`<div class="row"><span class="k">${k}</span><span class="v ${g?'gold':''}">${v}</span></div>`).join('');
 
-  const recos = [];
-  if(regime==='simples'){
-    recos.push('Avaliar, a partir de 2027, se vale a pena migrar para o regime regular de IBS e CBS, especialmente se seus clientes principais são empresas do Lucro Real ou Presumido que precisam de crédito destacado na nota.');
-    recos.push('Mapear desde já quais fornecedores emitem nota fiscal, para não perder competitividade de preço quando o crédito amplo se tornar padrão de mercado.');
+    const row = (lab, sh, pc, hl, byOut) => `<tr class="${hl?'hl':''}"><td>${lab}</td><td class="n">${byOut?'fora do DAS':fmtN(sh,2)+'%'}</td><td class="n">${byOut?'-':fmtN(pc,4)+'%'}</td><td class="n">${byOut?'-':fmtBRL(faturamento*pc/100)}</td></tr>`;
+    let rows = row('IRPJ', c27.s.irpj, c27.p.irpj) + row('CSLL', c27.s.csll, c27.p.csll) + row('CBS', c27.s.cbs, c27.p.cbs, true);
+    if(anexo!=='IV') rows += row('CPP', c27.s.cpp, c27.p.cpp);
+    if(anexo==='II') rows += row('IPI', c27.s.ipi, c27.p.ipi);
+    rows += row(locNome, c27.s.loc, c27.p.loc, false, fora) + row('IBS', c27.s.ibs, c27.p.ibs, true, fora);
+    const totShare = c27.s.irpj+c27.s.csll+c27.s.cbs+c27.s.cpp+c27.s.ipi+c27.s.loc+c27.s.ibs;
+    rows += `<tr class="tot"><td>Total do DAS</td><td class="n">${fmtN(totShare,2)}%</td><td class="n">${fmtN(c27.ef,4)}%</td><td class="n">${fmtBRL(faturamento*c27.ef/100)}</td></tr>`;
+    $('simplesTbl').innerHTML = `<thead><tr><th>Tributo</th><th class="n">Partilha na faixa</th><th class="n">% do faturamento</th><th class="n">R$ por ano</th></tr></thead><tbody>${rows}</tbody>`;
+
+    $('simplesExample').innerHTML = fora
+      ? `<div>Na 6ª faixa, a CBS ocupa <b>${fmtN(c27.s.cbs,2)}%</b> da alíquota efetiva: ${fmtN(c27.ef,4)}% × ${fmtN(c27.s.cbs,2)}% = <b>${fmtN(c27.p.cbs,4)}%</b> do faturamento.</div>`
+      : `<div>CBS: ${fmtN(c27.ef,4)}% × ${fmtN(c27.s.cbs,2)}% = <b>${fmtN(c27.p.cbs,4)}%</b> do faturamento (${fmtBRL(faturamento*c27.p.cbs/100)} por ano)</div>
+         <div>IBS: ${fmtN(c27.ef,4)}% × ${fmtN(c27.s.ibs,2)}% = <b>${fmtN(c27.p.ibs,4)}%</b> do faturamento (${fmtBRL(faturamento*c27.p.ibs/100)} por ano)</div>`;
+
+    // KPIs
+    const newInDas27 = c27.p.cbs + c27.p.ibs;
+    $('kpiAtualLabel').textContent = 'Alíquota efetiva do DAS (2027)';
+    $('kpiAtual').textContent = fmtN(c27.ef,2)+'% · '+fmtBRL(faturamento*c27.ef/100)+'/ano';
+    $('kpiNovoLabel').textContent = 'CBS + IBS dentro do DAS (2027)';
+    $('kpiNovo').textContent = fmtN(newInDas27,3)+'% · '+fmtBRL(faturamento*newInDas27/100)+'/ano';
+    const other33 = c33.p.irpj + c33.p.csll + c33.p.cpp + c33.p.ipi;
+    const hybrid = other33 + netNew;
+    const delta = hybrid - c33.ef;
+    $('kpiDeltaLabel').textContent = 'Regime regular de IBS e CBS vs DAS (2033)';
+    $('kpiDelta').textContent = (delta>=0?'+':'') + fmtN(delta,2) + ' p.p.';
+    if(delta>0){ tag.textContent='Permanecer no DAS tende a custar menos'; tag.className='delta up'; }
+    else { tag.textContent='O regime regular tende a custar menos'; tag.className='delta down'; }
+
+    // linha do tempo em barras empilhadas (composição da fatia de consumo no DAS)
+    $('tlTitle').textContent = 'Composição do DAS ao longo da transição, 2026 a 2033';
+    $('tlSub').textContent = 'Fatia de tributos sobre o consumo dentro do DAS (em % do faturamento): como PIS, COFINS, ICMS e ISS vão sendo substituídos por CBS e IBS.';
+    const fases = {
+      2026:'Simples fora do teste de CBS e IBS (art. 348, III, "c", LC 214/2025)',
+      2027:'CBS substitui PIS e COFINS no DAS; IBS entra com fatia mínima',
+      2028:'Mesma partilha de 2027',
+      2029:'IBS ocupa 10% da fatia de '+locNome,
+      2030:'IBS ocupa 20% da fatia de '+locNome,
+      2031:'IBS ocupa 30% da fatia de '+locNome,
+      2032:'IBS ocupa 40% da fatia de '+locNome,
+      2033:locNome+' extinto; IBS ocupa toda a fatia local',
+    };
+    const anos = [2026,2027,2028,2029,2030,2031,2032,2033].map(a=>({a, c:snCalc(anexo, faturamento, a)}));
+    const consumo = c => c.p.pis + c.p.cbs + c.p.ibs + c.p.loc + c.p.ipi;
+    const maxC = Math.max(...anos.map(x=>consumo(x.c)));
+    tl.innerHTML = anos.map(({a,c})=>{
+      const w = v => (v/maxC*100).toFixed(2);
+      const nums = a===2026
+        ? `PIS e COFINS ${fmtN(c.p.pis,3)}% · ${locNome}${anexo==='II'?' e IPI':''} ${fmtN(c.p.loc+c.p.ipi,3)}%`
+        : `CBS ${fmtN(c.p.cbs,3)}% · IBS ${fmtN(c.p.ibs,3)}% · ${locNome}${anexo==='II'?' e IPI':''} ${fmtN(c.p.loc+c.p.ipi,3)}%`;
+      return `<div class="tl-row">
+        <div class="tl-year mono">${a}</div>
+        <div>
+          <div class="tl-stack">
+            <div class="seg-pis" style="width:${w(c.p.pis)}%"></div>
+            <div class="seg-cbs" style="width:${w(c.p.cbs)}%"></div>
+            <div class="seg-ibs" style="width:${w(c.p.ibs)}%"></div>
+            <div class="seg-loc" style="width:${w(c.p.loc+c.p.ipi)}%"></div>
+          </div>
+          <div class="tl-note">${nums}</div>
+          <div class="tl-note">${fases[a]}</div>
+        </div>
+        <div class="tl-pct">${fmtN(c.ef,2)}%</div>
+      </div>`;
+    }).join('');
+    $('legend').innerHTML = `<span><span class="dot pis"></span> PIS e COFINS</span><span><span class="dot cbs"></span> CBS</span><span><span class="dot ibs"></span> IBS</span><span><span class="dot loc"></span> ${locNome}${anexo==='II'?' e IPI':''}</span><span>Coluna à direita: alíquota efetiva do DAS</span>`;
+
+    // base legal
+    const basis = [
+      {cite:'EC 132/2023', desc:'Emenda Constitucional que instituiu a reforma do consumo em todo o território nacional, criando o IVA dual (IBS e CBS) e o Imposto Seletivo.'},
+      {cite:'LC 214/2025', desc:'Lei complementar nacional que regulamenta o IBS, a CBS e o Imposto Seletivo e altera a LC 123/2006 (Simples Nacional).'},
+      {cite:'Art. 519, LC 214/2025', desc:'Os Anexos I a V da LC 123/2006 passam a vigorar com a redação dos Anexos XVIII a XXII, a partir de 1º de janeiro de 2027, com alíquotas e partilha fixadas ano a ano até 2033.'},
+      {cite:'Art. 348, III, "c"', desc:'As alíquotas de teste de 2026 (CBS 0,9% e IBS 0,1%) não se aplicam às operações dos optantes pelo Simples Nacional.'},
+      {cite:'LC 123/2006', desc:'Fórmula da alíquota efetiva: (RBT12 × alíquota nominal − parcela a deduzir) ÷ RBT12. O optante também pode apurar IBS e CBS pelo regime regular, mantendo no DAS os demais tributos.'},
+    ];
+    if(reducao>0) basis.push({cite:'Regime regular (art. 127, 128, 125)', desc:'A redução de alíquota do seu nicho só é aproveitada se a empresa optar por apurar IBS e CBS pelo regime regular. Dentro do DAS, vale a partilha do anexo.'});
+    $('basisList').innerHTML = basis.map(b=>`<div class="basis-item"><div class="cite">${b.cite}</div><div class="desc">${b.desc}</div></div>`).join('');
+
+    const recos = [
+      'As alíquotas nominais do Simples quase não mudam em 2027. O que muda é a composição interna do DAS: a CBS substitui PIS e COFINS e o IBS vai ocupando a fatia de '+locNome+' até 2033.',
+      'Seu cliente do regime regular só credita a CBS e o IBS efetivamente recolhidos no DAS, conforme o percentual da sua faixa. Se você vende para empresas, avalie se o crédito limitado afeta sua competitividade.',
+      'Compare, a partir de 2027, permanecer no DAS com apurar IBS e CBS pelo regime regular. A simulação acima estima o resultado de 2033 para o seu perfil de fornecedores e nicho.',
+      'Acompanhe o faturamento dos últimos 12 meses: mudar de faixa altera a alíquota efetiva e a partilha de CBS e IBS.',
+    ];
+    if(anexo==='III' || anexo==='V') recos.push('Confira o Fator R (folha de pagamento sobre receita) para confirmar se sua atividade fica no Anexo III ou no Anexo V.');
+    $('recoList').innerHTML = recos.map(r=>`<li>${r}</li>`).join('');
+
   } else {
-    recos.push('Formalizar a maior parte possível da cadeia de fornecedores. No novo sistema, cada real gasto com fornecedor que não emite nota fiscal é crédito perdido.');
-    recos.push('Revisar contratos e precificação para o período de 2027 a 2033, quando os dois sistemas convivem e a carga pode oscilar.');
-  }
-  if(segmento==='servico' && reducao===0) recos.push('Serviços em geral tendem a sentir mais a mudança, por terem historicamente menos crédito na cadeia. Vale revisar a margem praticada para o período de transição.');
-  if(reducao>=30) recos.push('Confirmar o correto enquadramento da atividade nos anexos da LC 214/2025 junto à Terrossi, para garantir que a redução de alíquota seja aplicada desde o início da cobrança efetiva em 2027.');
-  recos.push('Acompanhar as Resoluções do Senado que vão fixar definitivamente as alíquotas de referência da CBS e do IBS (art. 475, parágrafo 11, LC 214/2025).');
-  document.getElementById('recoList').innerHTML = recos.map(r=>`<li>${r}</li>`).join('');
+    // ---------- LUCRO PRESUMIDO / REAL (consumo + IRPJ + CSLL) ----------
+    const pres = PRES[$('pres').value] || PRES.ci;
+    const margem = parseFloat($('margem').value) || 0;
+    const locNome = segmento==='servico' ? 'ISS' : 'ICMS';
+    const pisCofins = regime==='presumido' ? 3.65 : 9.25*(1-credito);
+    const consumoAtual = segmento==='servico' ? aliqAtual : aliqAtual*(1-credito);
+    const cargaAtualPct = pisCofins + consumoAtual;
 
-  document.getElementById('form-flow').style.display='none';
-  document.getElementById('report').style.display='block';
+    const anos = [
+      {ano:2026, pct: cargaAtualPct, tag:'Fase de teste: CBS 0,9% e IBS 0,1%, sem desembolso real (art. 348, LC 214/2025)'},
+      {ano:2027, pct: cbsNet + consumoAtual, tag:'CBS substitui PIS e COFINS; Imposto Seletivo entra em vigor'},
+      {ano:2028, pct: cbsNet + consumoAtual, tag:'Consolidação, com ICMS e ISS ainda vigentes'},
+      {ano:2029, pct: cbsNet + ibsNet*0.10 + consumoAtual*0.90, tag:'IBS passa a substituir 10% do ICMS e do ISS'},
+      {ano:2030, pct: cbsNet + ibsNet*0.20 + consumoAtual*0.80, tag:'Substituição de 20% do ICMS e do ISS'},
+      {ano:2031, pct: cbsNet + ibsNet*0.30 + consumoAtual*0.70, tag:'Substituição de 30% do ICMS e do ISS'},
+      {ano:2032, pct: cbsNet + ibsNet*0.40 + consumoAtual*0.60, tag:'Substituição de 40% do ICMS e do ISS'},
+      {ano:2033, pct: netNew, tag:'Sistema pleno. ICMS, ISS, PIS, COFINS e IPI extintos'},
+    ];
+    // IRPJ e CSLL por ano. No Lucro Real, a variação da carga de consumo altera o lucro.
+    anos.forEach(a=>{
+      const t = irpjCsll(regime, faturamento, a.ano, pres, margem - (a.pct - cargaAtualPct));
+      a.irpj = t.irpj; a.csll = t.csll; a.total = a.pct + t.irpj + t.csll; a.t = t;
+    });
+    const a26 = anos[0], a33 = anos[7];
+
+    // KPIs (carga total: consumo + IRPJ + CSLL)
+    $('kpiAtualLabel').textContent = 'Carga atual total (consumo, IRPJ e CSLL)';
+    $('kpiAtual').textContent = fmtPct(a26.total) + ' · '+fmtBRL(faturamento*a26.total/100)+'/ano';
+    $('kpiNovoLabel').textContent = 'Carga estimada em 2033 (IBS, CBS, IRPJ e CSLL)';
+    $('kpiNovo').textContent = fmtPct(a33.total) + ' · '+fmtBRL(faturamento*a33.total/100)+'/ano';
+    const delta = a33.total - a26.total;
+    $('kpiDeltaLabel').textContent = 'Variação estimada na carga total';
+    $('kpiDelta').textContent = (delta>=0?'+':'') + fmtN(delta,2) + ' p.p.';
+    if(delta>0){ tag.textContent='Tendência de aumento de carga'; tag.className='delta up'; }
+    else { tag.textContent='Tendência de redução de carga'; tag.className='delta down'; }
+
+    // tabela de composição: hoje (2026) x 2033
+    const lin = (lab, v26, v33, hl) => `<tr class="${hl?'hl':''}"><td>${lab}</td><td class="n">${fmtN(v26,2)}%</td><td class="n">${fmtN(v33,2)}%</td><td class="n">${fmtBRL(faturamento*v26/100)}</td><td class="n">${fmtBRL(faturamento*v33/100)}</td></tr>`;
+    $('geralTbl').innerHTML = `<thead><tr><th>Tributo</th><th class="n">Hoje (% fat.)</th><th class="n">2033 (% fat.)</th><th class="n">Hoje (R$/ano)</th><th class="n">2033 (R$/ano)</th></tr></thead><tbody>`
+      + lin('PIS e COFINS', pisCofins, 0)
+      + lin(locNome, consumoAtual, 0)
+      + lin('CBS', 0, cbsNet, true)
+      + lin('IBS', 0, ibsNet, true)
+      + lin('IRPJ', a26.irpj, a33.irpj)
+      + lin('CSLL', a26.csll, a33.csll)
+      + `<tr class="tot"><td>Total</td><td class="n">${fmtN(a26.total,2)}%</td><td class="n">${fmtN(a33.total,2)}%</td><td class="n">${fmtBRL(faturamento*a26.total/100)}</td><td class="n">${fmtBRL(faturamento*a33.total/100)}</td></tr></tbody>`;
+
+    let nota;
+    if(regime==='presumido'){
+      nota = `<div>IRPJ: presunção de <b>${fmtN(pres[0],2)}%</b> sobre a receita, mais 15% de alíquota e 10% de adicional sobre a base que passa de R$ 240.000 por ano.</div>
+              <div>CSLL: presunção de <b>${fmtN(pres[1],2)}%</b> sobre a receita, com alíquota de 9%.</div>`;
+      if(faturamento>5000000) nota += `<div>Receita acima de R$ 5.000.000: a parcela excedente tem a presunção majorada em 10% (LC 224/2025), por exemplo de ${fmtN(pres[0],2)}% para ${fmtN(pres[0]*1.1,2)}% no IRPJ.</div>`;
+      else if(faturamento>3750000) nota += `<div>Em 2026, a CSLL já tem o acréscimo de 10% na presunção sobre a receita acima de R$ 3.750.000 (LC 224/2025). Em 2027, o limite passa a R$ 5.000.000.</div>`;
+    } else {
+      nota = `<div>Lucro estimado de <b>${fmtN(margem,1)}%</b> do faturamento (${fmtBRL(faturamento*margem/100)} por ano) antes do IRPJ e da CSLL, com IRPJ de 15% mais 10% de adicional sobre o lucro acima de R$ 240.000 por ano e CSLL de 9%.</div>
+              <div>Como a carga de consumo muda ao longo da transição, o lucro e, por consequência, o IRPJ e a CSLL também variam de um ano para outro.</div>`;
+    }
+    $('geralNote').innerHTML = nota;
+
+    // linha do tempo em barras empilhadas: consumo + IRPJ + CSLL
+    $('tlTitle').textContent = 'Carga total ao longo da transição, 2026 a 2033';
+    $('tlSub').textContent = 'Tributos sobre o consumo, IRPJ e CSLL em % do faturamento, ano a ano, conforme o cronograma nacional da LC 214/2025.';
+    const maxT = Math.max(...anos.map(a=>a.total));
+    tl.innerHTML = anos.map(a=>{
+      const w = v => (v/maxT*100).toFixed(2);
+      return `<div class="tl-row">
+        <div class="tl-year mono">${a.ano}</div>
+        <div>
+          <div class="tl-stack">
+            <div class="seg-cons ${a.ano>=2033?'seg-new':''}" style="width:${w(a.pct)}%"></div>
+            <div class="seg-irpj" style="width:${w(a.irpj)}%"></div>
+            <div class="seg-csll" style="width:${w(a.csll)}%"></div>
+          </div>
+          <div class="tl-note">Consumo ${fmtN(a.pct,2)}% · IRPJ ${fmtN(a.irpj,2)}% · CSLL ${fmtN(a.csll,2)}%</div>
+          <div class="tl-note">${a.tag}</div>
+        </div>
+        <div class="tl-pct">${fmtN(a.total,2)}%</div>
+      </div>`;
+    }).join('');
+    $('legend').innerHTML = '<span><span class="dot cons"></span> Consumo (PIS, COFINS, ICMS, ISS, CBS e IBS)</span><span><span class="dot irpj"></span> IRPJ</span><span><span class="dot csll"></span> CSLL</span><span>Coluna à direita: carga total</span>';
+
+    const basis = [
+      {cite:'EC 132/2023', desc:'Emenda Constitucional que instituiu a reforma do consumo em todo o território nacional, criando o IVA dual (IBS e CBS) e o Imposto Seletivo.'},
+      {cite:'LC 214/2025', desc:'Lei complementar nacional que regulamenta o IBS, a CBS e o Imposto Seletivo: fato gerador, não cumulatividade, regimes específicos e cronograma de transição.'},
+      {cite:'Art. 348, LC 214/2025', desc:'2026 é ano-teste em todo o Brasil: CBS e IBS incidem a 0,9% e 0,1%, compensáveis com PIS e COFINS, sem recolhimento efetivo para quem cumprir as obrigações acessórias.'},
+      {cite:'Arts. 90 a 99', desc:'Criação do Comitê Gestor do IBS, órgão nacional responsável pela governança e regulamentação do imposto durante a transição.'},
+      {cite:'Lei 9.249/1995 e Lei 7.689/1988', desc:'IRPJ de 15% com adicional de 10% sobre o lucro que exceder R$ 20.000 por mês, e CSLL de 9%. A reforma do consumo não substitui esses tributos.'},
+    ];
+    if(regime==='presumido') basis.push({cite:'Arts. 15 e 20, Lei 9.249/1995', desc:'Percentuais de presunção do lucro por atividade, aplicados sobre a receita bruta para apurar a base do IRPJ e da CSLL no Lucro Presumido.'});
+    if(regime==='presumido') basis.push({cite:'Art. 4º, LC 224/2025', desc:'Acréscimo de 10% nos percentuais de presunção sobre a parcela da receita bruta anual que exceder R$ 5 milhões (R$ 3,75 milhões para a CSLL em 2026). O tema é objeto de questionamento judicial.'});
+    if(reducao===30) basis.push({cite:'Art. 127, LC 214/2025', desc:'Redução nacional de 30% na alíquota de referência para profissões intelectuais regulamentadas por conselho de classe.'});
+    if(reducao===60) basis.push({cite:'Art. 128, LC 214/2025', desc:'Redução nacional de 60% na alíquota de referência para saúde, educação, dispositivos médicos, medicamentos e alimentos.'});
+    if(reducao===100) basis.push({cite:'Arts. 125 e 157, LC 214/2025', desc:'Alíquota zero para a Cesta Básica Nacional e isenção para o transporte público coletivo, aplicáveis em todo o país.'});
+    $('basisList').innerHTML = basis.map(b=>`<div class="basis-item"><div class="cite">${b.cite}</div><div class="desc">${b.desc}</div></div>`).join('');
+
+    const recos = [
+      'Formalizar a maior parte possível da cadeia de fornecedores. No novo sistema, cada real gasto com fornecedor que não emite nota fiscal é crédito perdido.',
+      'Revisar contratos e precificação para o período de 2027 a 2033, quando os dois sistemas convivem e a carga pode oscilar.',
+    ];
+    if(regime==='presumido' && faturamento>5000000) recos.push('Com receita acima de R$ 5 milhões, o acréscimo da LC 224/2025 encarece o Lucro Presumido. Vale comparar com o Lucro Real, principalmente se a margem real for menor que a presumida.');
+    if(regime==='presumido') recos.push('Compare o Lucro Presumido com o Lucro Real: no Real, PIS e COFINS são não cumulativos e o IRPJ e a CSLL incidem sobre o lucro efetivo, o que pode compensar quando a margem é baixa.');
+    if(regime==='real') recos.push('No Lucro Real, acompanhe como a mudança da carga de consumo afeta o seu lucro tributável: ela altera o IRPJ e a CSLL ao longo da transição.');
+    if(segmento==='servico' && reducao===0) recos.push('Serviços em geral tendem a sentir mais a mudança, por terem historicamente menos crédito na cadeia. Vale revisar a margem praticada para o período de transição.');
+    if(reducao>=30) recos.push('Confirmar o correto enquadramento da atividade nos anexos da LC 214/2025 junto à Terrossi, para garantir que a redução de alíquota seja aplicada desde o início da cobrança efetiva em 2027.');
+    recos.push('Acompanhar as Resoluções do Senado que vão fixar definitivamente as alíquotas de referência da CBS e do IBS (art. 475, parágrafo 11, LC 214/2025).');
+    $('recoList').innerHTML = recos.map(r=>`<li>${r}</li>`).join('');
+  }
+
+  $('form-flow').style.display='none';
+  $('report').style.display='block';
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
@@ -595,14 +924,6 @@ function regimeLabel(r){ return {simples:'Simples Nacional', presumido:'Lucro Pr
 function nichoLabel(n){
   return {geral:'Atividade geral', profissional:'Profissional regulamentado', saude:'Saúde', educacao:'Educação',
     medicamentos:'Medicamentos e dispositivos médicos', alimentos:'Alimentos', cestabasica:'Cesta básica', transporte:'Transporte público'}[n] || 'Atividade geral';
-}
-
-function enviarLead(){
-  const nome = document.getElementById('leadNome').value.trim() || 'Não informado';
-  const whats = document.getElementById('leadWhats').value.trim() || 'Não informado';
-  const empresa = document.getElementById('companyName').value.trim() || 'Não informado';
-  const msg = encodeURIComponent(`Olá, Terrossi! Fiz a simulação da Reforma Tributária no site.\nEmpresa: ${empresa}\nNome: ${nome}\nWhatsApp: ${whats}\nGostaria de uma análise completa.`);
-  window.open(`https://wa.me/?text=${msg}`, '_blank');
 }
 
 async function baixarPDF(){

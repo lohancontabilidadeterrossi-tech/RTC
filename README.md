@@ -2,7 +2,7 @@
 
 Ferramenta web que simula o impacto da Reforma Tributária do consumo (IBS, CBS e Imposto Seletivo) em empresas de todo o Brasil, ano a ano, de 2026 a 2033.
 
-A empresa informa segmento, regime tributário, faturamento, crédito de fornecedores e nicho de atividade, e recebe um relatório com a carga atual, a carga estimada em 2033, a linha do tempo da transição, a base legal aplicada e recomendações. O relatório pode ser baixado em PDF.
+A empresa informa segmento, regime tributário, faturamento, crédito de fornecedores e nicho de atividade, e recebe um relatório com a carga atual, a carga estimada em 2033, a linha do tempo da transição, a base legal aplicada e recomendações. Para optantes do Simples Nacional, o usuário escolhe o Anexo (I a V) e o relatório calcula a alíquota efetiva e a partilha do DAS com CBS e IBS, conforme as tabelas da LC 123/2006 com a redação da LC 214/2025 a partir de 2027. Para Lucro Presumido e Lucro Real, a simulação inclui IRPJ e CSLL (percentuais de presunção, acréscimo da LC 224/2025 e adicional de 10% do IRPJ). O relatório pode ser baixado em PDF.
 
 ## Base legal
 
